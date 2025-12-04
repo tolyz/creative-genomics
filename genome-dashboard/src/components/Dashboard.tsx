@@ -11,6 +11,7 @@ import { estimateHaplogroups } from '../utils/haplogroup';
 import { exportTo23andMe } from '../utils/exporter';
 import { Card } from './Card';
 import { GenomeArt } from './GenomeArt';
+import { GenomeArtV2 } from './GenomeArtV2';
 import { AlertTriangle, CheckCircle, Dna, Users, Activity, Globe, Download, Edit2, Save, Palette } from 'lucide-react';
 
 interface DashboardProps {
@@ -26,6 +27,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   
   // State for Art Tab Selection
   const [artPerson, setArtPerson] = useState<'father' | 'mother' | 'son1' | 'son2'>('father');
+  const [artVersion, setArtVersion] = useState<'v1' | 'v2'>('v2');
 
   const mendelian = useMemo(() => analyzeMendelianConsistency(data.entries), [data]);
   const mitochondrial = useMemo(() => analyzeMitochondrial(data.entries), [data]);
@@ -488,11 +490,48 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                   </div>
               </Card>
               
-              <GenomeArt 
-                  entries={data.entries} 
-                  person={artPerson} 
-                  personName={artPerson.charAt(0).toUpperCase() + artPerson.slice(1)} 
-              />
+              <Card>
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600 font-medium">Algorithm Version:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                            <button
+                                onClick={() => setArtVersion('v1')}
+                                className={`px-3 py-1 rounded text-sm transition-all ${
+                                    artVersion === 'v1' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                V1 (Classic)
+                            </button>
+                            <button
+                                onClick={() => setArtVersion('v2')}
+                                className={`px-3 py-1 rounded text-sm transition-all ${
+                                    artVersion === 'v2' ? 'bg-white shadow text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                V2 (Generative)
+                            </button>
+                        </div>
+                   </div>
+                   <div className="text-xs text-gray-400">
+                        {artVersion === 'v1' ? 'Standard CGR • Manual Controls' : 'Drastic Distortion • Unique Colors'}
+                   </div>
+                </div>
+              </Card>
+
+              {artVersion === 'v1' ? (
+                  <GenomeArt 
+                      entries={data.entries} 
+                      person={artPerson} 
+                      personName={artPerson.charAt(0).toUpperCase() + artPerson.slice(1)} 
+                  />
+              ) : (
+                  <GenomeArtV2 
+                      entries={data.entries} 
+                      person={artPerson} 
+                      personName={artPerson.charAt(0).toUpperCase() + artPerson.slice(1)} 
+                  />
+              )}
           </div>
       )}
     </div>
